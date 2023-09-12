@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://bitcoincore.tech/apps/bitcoinjs-ui/lib/bitcoinjs-lib.js"></script>
+    <script src="https://bundle.run/noble-secp256k1@1.2.14"></script>
+</head>
+<body>
+<script>
+var { getSharedSecret, schnorr, utils } = nobleSecp256k1
+var crypto = window.crypto
+var getRand = size => crypto.getRandomValues(new
+Uint8Array(size))
+var sha256 = bitcoinjs.crypto.sha256
+var keypair = bitcoinjs.ECPair.makeRandom()
+var privKey = keypair.privateKey.toString( "hex" )
+var pubKey = keypair.publicKey.toString( "hex" )
+pubKey = pubKey.substring( 2 )
+console.log( pubKey );
+
+var relay = "wss://relay.damus.io";
+var socket = new WebSocket( relay );
+
+
+</script>
+</body>
+
+</html>
