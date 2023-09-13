@@ -19,18 +19,21 @@ var pubKey = keypair.publicKey.toString( "hex" )
 pubKey = pubKey.substring( 2 )
 console.log( pubKey );
 
-var relay = "wss://relay.damus.io";
-var socket = new WebSocket( relay );
+var relay = ["wss://relay.damus.io","wss://relay.unikku.com"];
+relay.forEach(x=>{
+    console.log(x)
+    var socket = new WebSocket( x );
 
 socket.addEventListener('message', async function( message ) {
     var [ type, subId, event ] = JSON.parse( message.data );
-    var { kind, content } = event || {}
+    var { kind, content,id } = event || {}
     if (!event || event === true) return
     console.log('message:', event)
     if (kind === 4) {
     content = await decrypt(privKey, event.pubkey, content)
     }
-    console.log('content:', content)
+    console.log('content in ' + x + ' :'+ content)
+    console.log('Id in ' + x + ' :'+ id)
 })
 
 var subId = bitcoinjs.ECPair.makeRandom().privateKey.toString(
@@ -38,7 +41,7 @@ var subId = bitcoinjs.ECPair.makeRandom().privateKey.toString(
 var filter = { "authors": [ pubKey ] }
 
 socket.addEventListener('open', async function( e ) {
-    console.log( "connected to " + relay )
+    console.log( "connected to " + x )
     var subscription = [ "REQ", subId, filter ]
     console.log('Subscription:', subscription)
     socket.send(JSON.stringify( subscription ));
@@ -66,6 +69,53 @@ socket.addEventListener('open', async function( e ) {
     var signedEvent2 = await getSignedEvent(event2, privKey)
     socket.send(JSON.stringify([ "EVENT", signedEvent2 ]))
 }) 
+})
+// var socket = new WebSocket( relay );
+
+// socket.addEventListener('message', async function( message ) {
+//     var [ type, subId, event ] = JSON.parse( message.data );
+//     var { kind, content } = event || {}
+//     if (!event || event === true) return
+//     console.log('message:', event)
+//     if (kind === 4) {
+//     content = await decrypt(privKey, event.pubkey, content)
+//     }
+//     console.log('content:', content)
+// })
+
+// var subId = bitcoinjs.ECPair.makeRandom().privateKey.toString(
+// "hex" ).substring(0,16);
+// var filter = { "authors": [ pubKey ] }
+
+// socket.addEventListener('open', async function( e ) {
+//     console.log( "connected to " + relay )
+//     var subscription = [ "REQ", subId, filter ]
+//     console.log('Subscription:', subscription)
+//     socket.send(JSON.stringify( subscription ));
+
+//     var event = {
+//         "content" : "this workshop is awesome!",
+//         "created_at" : Math.floor( Date.now() / 1000 ),
+//         "kind" : 1,
+//         "tags" : [],
+//         "pubkey" : pubKey,
+//     }
+//     var signedEvent = await getSignedEvent(event, privKey)
+//     console.log('signedEvent:', signedEvent)
+//     socket.send(JSON.stringify([ "EVENT", signedEvent ]))
+
+//     var message = "this message is super secret!"
+//     var encrypted = encrypt( privKey, pubKey, message )
+//     var event2 = {
+//         "content" : encrypted,
+//         "created_at" : Math.floor( Date.now() / 1000 ),
+//         "kind" : 4,
+//         "tags" : [ [ 'p', pubKey ] ],
+//         "pubkey" : pubKey,
+//     }
+//     var signedEvent2 = await getSignedEvent(event2, privKey)
+//     socket.send(JSON.stringify([ "EVENT", signedEvent2 ]))
+// }) 
 
 async function getSignedEvent(event, privateKey) {
     var eventData = JSON.stringify([
