@@ -19,7 +19,10 @@
     pubKey = pubKey.substring( 2 )
     console.log( pubKey );
 
-    var relay = ["wss://relay.damus.io","wss://relay.unikku.com"];
+    var relay = [
+        "wss://relay.damus.io",
+        "wss://relay.unikku.com"
+    ];
     relay.forEach(x=>{
         console.log(x)
         var socket = new WebSocket( x );
